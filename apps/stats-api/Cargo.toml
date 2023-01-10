@@ -8,12 +8,13 @@ edition = "2021"
 [dependencies]
 db = {workspace = true}
 
-# chrono = {workspace = true}
+axum = {workspace = true}
+deadpool-postgres = {workspace = true, features = ["rt_tokio_1"]}
 dotenv = {workspace = true}
 futures = {workspace = true}
 log = {workspace = true}
-# parse_duration = {workspace = true}
 pretty_env_logger = {workspace = true}
+serde = {workspace = true, features = ["derive"]}
 structopt = {workspace = true}
 tokio = {workspace = true, features = ["rt", "rt-multi-thread", "macros"]}
 tokio-postgres = {workspace = true}

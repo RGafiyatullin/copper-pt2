@@ -8,8 +8,10 @@ members = [
 db = {path = "libs/db"}
 hn-api = {path = "libs/hn-api"}
 
+axum = "^0.6"
 bytes = "^1"
 chrono = "^0.4"
+deadpool-postgres = "^0.10"
 dotenv = "^0.15"
 futures = "^0.3"
 log = "^0.4"
