@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use bytes::Buf;
 
 use crate::error::Error;

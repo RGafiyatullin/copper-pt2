@@ -1,47 +1,44 @@
-use chrono::Offset;
-use futures::StreamExt;
-use playground::{HnApiClient, PgClient};
+use std::future::Future;
 
+pub type PgClient = tokio_postgres::Client;
 pub type AnyError = Box<dyn std::error::Error + Send + Sync + 'static>;
 
-#[derive(Debug, structopt::StructOpt)]
-struct Args {
-    #[structopt(
-        long,
-        env = "DB",
-        default_value = "host=127.0.0.1 port=5432 user=dev password=dev dbname=dev"
-    )]
-    db: String,
+use chrono::Offset;
+use futures::StreamExt;
+pub use hn_api::HnApiClient;
 
-    #[structopt(long, env = "HN_API_CONCURRENCY", default_value = "1")]
+pub mod args;
+
+pub async fn with_db<V, E, F, Fut>(db_config: &str, f: F) -> Result<V, AnyError>
+where
+    F: FnOnce(PgClient) -> Fut,
+    Fut: Future<Output = Result<V, E>>,
+    E: Into<AnyError>,
+{
+    let (client, conn) = tokio_postgres::connect(db_config, tokio_postgres::NoTls).await?;
+    let client_running = async move { f(client).await.map_err(Into::into) };
+    let conn_running = async move { conn.await.map_err(Into::into) };
+
+    let (value, ()) = futures::future::try_join(client_running, conn_running).await?;
+
+    Ok(value)
+}
+
+pub async fn with_hn_api<V, E, F, Fut>(base_url: &str, f: F) -> Result<V, AnyError>
+where
+    F: FnOnce(HnApiClient) -> Fut,
+    Fut: Future<Output = Result<V, E>>,
+    E: Into<AnyError>,
+{
+    let client = HnApiClient::new(base_url)?;
+    f(client).await.map_err(Into::into)
+}
+
+pub async fn single_snapshot(
     hn_api_concurrency: usize,
-
-    #[structopt(long, env = "HN_API_BASE_URL", default_value = "https://hacker-news.firebaseio.com/")]
-    hn_api_base_url: String,
-}
-
-#[tokio::main(flavor = "current_thread")]
-async fn main() -> Result<(), AnyError> {
-    let _ = dotenv::dotenv();
-    let () = pretty_env_logger::init_timed();
-
-    let args: Args = structopt::StructOpt::from_args();
-    let args = &args;
-
-    let snapshot_id = playground::with_db(&args.db, |db| async move {
-        playground::with_hn_api(&args.hn_api_base_url, move |hn_api| async move {
-            run(&args, db, hn_api).await
-        })
-        .await
-    })
-    .await?;
-
-    println!("SNAPSHOT: {:?}", snapshot_id);
-
-    Ok(())
-}
-
-async fn run(args: &Args, mut db: PgClient, hn_api: HnApiClient) -> Result<i64, AnyError> {
+    db: &mut PgClient,
+    hn_api: &HnApiClient,
+) -> Result<i64, AnyError> {
     let top_ids = hn_api.top().await?;
 
     let now: db::DateTime = chrono::Utc::now().into();
@@ -60,7 +57,7 @@ async fn run(args: &Args, mut db: PgClient, hn_api: HnApiClient) -> Result<i64, 
     });
 
     let mut items_fetched =
-        futures::stream::iter(item_fetch_workers).buffer_unordered(args.hn_api_concurrency);
+        futures::stream::iter(item_fetch_workers).buffer_unordered(hn_api_concurrency);
 
     while let Some(item_fetch_result) = items_fetched.next().await {
         let (item_id, rank, item_info) = item_fetch_result?;

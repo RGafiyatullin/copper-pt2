@@ -11,18 +11,16 @@ services:
     volumes:
       - 'pg-data:/var/lib/postgresql/data:rw'
       - '../../libs/db/schema.d:/docker-entrypoint-initdb.d:ro'
-  snapshots:
+  snapshotd:
     build:
       context: ../..
       dockerfile: deploy.d/Dockerfile
       args:
-        COMPONENT: take-snapshot
+        COMPONENT: snapshotd
     environment:
       HN_API_CONCURRENCY: 50
       DB: 'host=pg port=5432 user=dev password=dev dbname=dev'
       RUST_LOG: 'info,playground=debug,take_snapshot=trace,hn_api=info'
-    volumes:
-      - '../../deploy.d/scripts.d/take-snapshots-periodically.sh:/app/sbin/take-snapshots-periodically.sh:ro'
-    entrypoint: /app/sbin/take-snapshots-periodically.sh
+    entrypoint: /app/bin/snapshotd
     
     

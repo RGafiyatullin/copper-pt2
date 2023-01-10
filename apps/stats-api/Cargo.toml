@@ -1,5 +1,5 @@
 [package]
-name = "playground"
+name = "stats-api"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,13 +7,13 @@ edition = "2021"
 
 [dependencies]
 db = {workspace = true}
-hn-api = {workspace = true}
 
-chrono = {workspace = true}
+# chrono = {workspace = true}
 dotenv = {workspace = true}
 futures = {workspace = true}
 log = {workspace = true}
+# parse_duration = {workspace = true}
 pretty_env_logger = {workspace = true}
 structopt = {workspace = true}
-tokio = {workspace = true, features = ["rt", "macros"]}
+tokio = {workspace = true, features = ["rt", "rt-multi-thread", "macros"]}
 tokio-postgres = {workspace = true}

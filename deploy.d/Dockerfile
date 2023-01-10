@@ -10,7 +10,7 @@ WORKDIR /src
 
 RUN cargo build --release
 
-FROM debian:buster
+FROM rust:1.66
 
 RUN apt-get update && \
     apt-get install -y \
@@ -20,4 +20,6 @@ RUN apt-get update && \
 ARG COMPONENT
 
 COPY --from=build /src/target/release/$COMPONENT /app/bin/$COMPONENT
+
+# COPY --from=build /src/target /app/.build-release-target
 
