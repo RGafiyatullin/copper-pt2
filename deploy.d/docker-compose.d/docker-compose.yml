@@ -23,6 +23,7 @@ services:
       DB: 'host=pg port=5432 user=dev password=dev dbname=dev'
       RUST_LOG: 'info,playground=debug,take_snapshot=trace,hn_api=info'
     entrypoint: /app/bin/snapshotd
+    restart: on-failure
 
   stats-http-api:
     build:
@@ -35,5 +36,6 @@ services:
       RUST_LOG: 'info,playground=debug,take_snapshot=trace,hn_api=info'
       BIND_ADDR: '0.0.0.0:80'
     entrypoint: /app/bin/stats-http-api
+    restart: on-failure
     
     
