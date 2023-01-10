@@ -1,0 +1,7 @@
+/target
+/Cargo.lock
+/.vscode
+/archive
+*.beam
+.env
+/coverage.lcov

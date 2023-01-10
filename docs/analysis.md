@@ -18,6 +18,7 @@ The **/news** section of the site shows the posts with the best (lowest numerica
 A record per each fetch of a page.
 
 Props:
+
 - url: `URL` — the URL of the page;
 - fetched at: `Timestamp` — the time at which the page was fetched.
 
@@ -27,6 +28,7 @@ A record with the payload of a **Page Snapshot**.
 Maybe be dropped during the archiving to save space.
 
 Props:
+
 - snapshot: `ID`;
 - data: `Bytes`.
 
@@ -35,6 +37,7 @@ Props:
 Such record reflects the fact of a **Page** being already processed.
 
 Props:
+
 - snapshot: `ID`.
 
 ## Scrap Error
@@ -42,6 +45,7 @@ Props:
 A record for a **Scrap** failure.
 
 Props:
+
 - scrap: `ID`;
 - error: `String`.
 
@@ -50,6 +54,7 @@ Props:
 A post extracted by processing a **Page**.
 
 Props:
+
 - scrap `ID`;
 - item_id: `i64`;
 - link: `URL`;
@@ -64,6 +69,7 @@ Props:
 A record reflecting the score of a **Post** as seen in a specific snapshot.
 
 Props:
+
 - post: `ID`;
 - scrap: `ID`;
 - score: `i32`.
@@ -73,6 +79,7 @@ Props:
 A record reflecting the rank of a **Post** as seen in a specific snapshot.
 
 Props:
+
 - post: `ID`;
 - scrap: `ID`;
 - rank: `i32`.
@@ -82,6 +89,7 @@ Props:
 # Grabbing the Data
 
 In order to acquire that data from the site, the solution would have to:
+
 - fetch the pages, 1 through 30 (28?);
 - scrap the data out of those pages;
 - store it in the database.
@@ -95,6 +103,7 @@ Note: The site seems not to like being crawled...
 ## List of top posts
 
 We are searching for the **Rank** records such that the result set would contain:
+
 - one record per each `Rank.rank` value (i.e. one — first place, one — second place, etc);
 - for each result set record, choose the `Rank->Scrap->Snapshot` with the most recent `Snapshot.fetched_at`.
 
